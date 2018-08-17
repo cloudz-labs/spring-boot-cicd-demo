@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: spring-boot-cicd-demo
+spec:
+  rules:
+  - host: edu1-cicd-demo.zcp-demo.jp-tok.containers.mybluemix.net
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: spring-boot-cicd-demo
+          servicePort: 80
