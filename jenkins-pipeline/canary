@@ -1,0 +1,85 @@
+# Properties Content
+GIT_URL=https://git.cloudzcp.io/edu1/spring-boot-cicd-demo.git
+GIT_BRANCH=master
+GIT_CREDENTIAL=gitea_edu1_credential
+GIT_WEB_VIEW_URL=https://git.cloudzcp.io/edu1/spring-boot-cicd-demo
+MAVEN_REPO_PVC=zcp-jenkins-mvn-repo-3
+DOCKER_IMAGE_NAME=spring-boot-cicd-demo
+DOCKER_IMAGE_TAG=prod
+DOCKER_REGISTRY=registry.cloudzcp.io
+DOCKER_NAMESPACE=edu1
+DOCKER_EMAIL=edu1@sk.com
+DOCKER_CREDENTIAL=registry_edu1_credential
+K8S_NAMESPACE=edu1
+DEPLOYMENT_NAME=spring-boot-cicd-demo-canary
+CONTAINER_NAME=spring-boot-cicd-demo
+K8S_SECRET=zcp-system-sa-edu1
+REGISTRY_SECRET=regcred
+
+# Pipeline Script
+def label = "jenkins-${UUID.randomUUID().toString()}"
+podTemplate(label:label,
+    serviceAccount: K8S_SECRET,
+    containers: [
+        containerTemplate(name: 'maven', image: 'maven:3.5.2-jdk-8-alpine', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat')
+    ],
+    volumes: [
+        hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
+        persistentVolumeClaim(mountPath: '/root/.m2', claimName: MAVEN_REPO_PVC)
+    ]) {
+
+    node(label) {
+        def myRepo
+
+        stage('checkout') {
+            myRepo = checkout([
+                $class: 'GitSCM',
+                branches: [[name: '*/' + GIT_BRANCH]],
+                browser: [$class: 'GogsGit', repoUrl: GIT_WEB_VIEW_URL],
+                doGenerateSubmoduleConfigurations: false,
+                extensions: [],
+                submoduleCfg: [],
+                userRemoteConfigs: [[
+                    credentialsId: GIT_CREDENTIAL,
+                    url: GIT_URL
+                ]]
+            ])
+        }
+
+        stage('build') {
+            container('maven') {
+                sh 'mvn clean package -Dmaven.repo.local=/root/.m2/${JOB_NAME}'
+            }
+        }
+
+        def DOCKER_IMAGE_URL = '${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}'
+
+        stage('Build Docker image') {
+            container('docker') {
+                withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIAL, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USER')]) {
+                    sh 'docker login ${DOCKER_REGISTRY} -u ' + DOCKER_USER + ' -p ' + DOCKER_PASSWORD
+                    sh 'docker build -t ' + DOCKER_IMAGE_URL + ' .'
+                    sh 'docker push ' + DOCKER_IMAGE_URL
+                }
+            }
+        }
+
+        stage('kubectl') {
+            container('kubectl') {
+                withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIAL, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USER')]) {
+                    try {
+                        sh 'kubectl create secret docker-registry ${REGISTRY_SECRET} --docker-server=${DOCKER_REGISTRY} --docker-username=' + DOCKER_USER + ' --docker-password=' + DOCKER_PASSWORD + ' --docker-email=${DOCKER_EMAIL} -n ${K8S_NAMESPACE}'
+                    } catch (Exception e) {
+
+                    }
+
+                    sh 'kubectl apply -f kubernetes/deployment-canary.yaml -n ${K8S_NAMESPACE}'
+                    sh 'kubectl apply -f kubernetes/service.yaml -n ${K8S_NAMESPACE}'
+                    sh 'kubectl apply -f kubernetes/ingress.yaml -n ${K8S_NAMESPACE}'
+                }
+            }
+        }
+    }
+}
