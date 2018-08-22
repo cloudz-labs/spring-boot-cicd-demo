@@ -11,8 +11,8 @@ DOCKER_NAMESPACE=edu1
 DOCKER_EMAIL=edu1@sk.com
 DOCKER_CREDENTIAL=registry_edu1_credential
 K8S_NAMESPACE=edu1
-DEPLOYMENT_NAME=spring-boot-cicd-demo-canary
-CONTAINER_NAME=spring-boot-cicd-demo
+ORIGIN_DEPLOYMENT_NAME=spring-boot-cicd-demo
+CANARY_DEPLOYMENT_NAME=spring-boot-cicd-demo-canary
 K8S_SECRET=zcp-system-sa-edu1
 REGISTRY_SECRET=regcred
 
@@ -78,6 +78,8 @@ podTemplate(label:label,
                     sh 'kubectl apply -f kubernetes/deployment-canary.yaml -n ${K8S_NAMESPACE}'
                     sh 'kubectl apply -f kubernetes/service.yaml -n ${K8S_NAMESPACE}'
                     sh 'kubectl apply -f kubernetes/ingress.yaml -n ${K8S_NAMESPACE}'
+                   
+                    sh 'kubectl scale deployment ${ORIGIN_DEPLOYMENT_NAME} --replicas=4'
                 }
             }
         }
