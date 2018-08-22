@@ -1,0 +1,16 @@
+def label = "jenkins-${UUID.randomUUID().toString()}"
+podTemplate(label:label,
+    serviceAccount: K8S_SECRET,
+    containers: [
+        containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat')
+    ]) {
+
+    node(label) {
+        stage('kubectl') {
+            container('kubectl') {
+                sh 'kubectl scale deployment ${ORIGIN_DEPLOYMENT_NAME} --replicas=${ORIGIN_INSTANCE_COUNT}'
+                sh 'kubectl scale deployment ${CANARY_DEPLOYMENT_NAME} --replicas=${CANARY_INSTANCE_COUNT}'
+            }
+        }
+    }
+}

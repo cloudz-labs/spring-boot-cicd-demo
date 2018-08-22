@@ -1,0 +1,4 @@
+ORIGIN_DEPLOYMENT_NAME=spring-boot-cicd-demo
+CANARY_DEPLOYMENT_NAME=spring-boot-cicd-demo-canary
+K8S_SECRET=zcp-system-sa-edu1
+K8S_NAMESPACE=edu1
