@@ -1,7 +1,7 @@
-GIT_URL=https://git.cloudzcp.io/edu1/spring-boot-cicd-demo.git
+GIT_URL=https://github.com/cloudz-labs/spring-boot-cicd-demo.git
 GIT_BRANCH=dev
 GIT_CREDENTIAL=gitea_edu1_credential
-GIT_WEB_VIEW_URL=https://git.cloudzcp.io/edu1/spring-boot-cicd-demo
+GIT_WEB_VIEW_URL=https://github.com/cloudz-labs/spring-boot-cicd-demo
 MAVEN_REPO_PVC=zcp-jenkins-mvn-repo-3
 DOCKER_IMAGE_NAME=spring-boot-cicd-demo
 DOCKER_IMAGE_TAG=dev
