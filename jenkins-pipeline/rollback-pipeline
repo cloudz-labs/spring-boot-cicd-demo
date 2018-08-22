@@ -1,9 +1,3 @@
-# Properties Content
-DEPLOYMENT_NAME=spring-boot-cicd-demo
-K8S_SECRET=zcp-system-sa-edu1
-K8S_NAMESPACE=edu1
-
-# Pipeline Script
 def label = "jenkins-${UUID.randomUUID().toString()}"
 podTemplate(label:label,
     serviceAccount: K8S_SECRET,

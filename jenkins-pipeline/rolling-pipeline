@@ -1,22 +1,3 @@
-# Properties Content
-GIT_URL=https://git.cloudzcp.io/edu1/spring-boot-cicd-demo.git
-GIT_BRANCH=master
-GIT_CREDENTIAL=gitea_edu1_credential
-GIT_WEB_VIEW_URL=https://git.cloudzcp.io/edu1/spring-boot-cicd-demo
-MAVEN_REPO_PVC=zcp-jenkins-mvn-repo-3
-DOCKER_IMAGE_NAME=spring-boot-cicd-demo
-DOCKER_IMAGE_TAG=prod
-DOCKER_REGISTRY=registry.cloudzcp.io
-DOCKER_NAMESPACE=edu1
-DOCKER_EMAIL=edu1@sk.com
-DOCKER_CREDENTIAL=registry_edu1_credential
-K8S_NAMESPACE=edu1
-ORIGIN_DEPLOYMENT_NAME=spring-boot-cicd-demo
-CANARY_DEPLOYMENT_NAME=spring-boot-cicd-demo-canary
-K8S_SECRET=zcp-system-sa-edu1
-REGISTRY_SECRET=regcred
-
-# Pipeline Script
 def label = "jenkins-${UUID.randomUUID().toString()}"
 podTemplate(label:label,
     serviceAccount: K8S_SECRET,
@@ -75,10 +56,9 @@ podTemplate(label:label,
 
                     }
 
-                    sh 'kubectl apply -f kubernetes/deployment-canary.yaml -n ${K8S_NAMESPACE}'
+                    sh 'kubectl apply -f kubernetes/deployment.yaml -n ${K8S_NAMESPACE}'
                     sh 'kubectl apply -f kubernetes/service.yaml -n ${K8S_NAMESPACE}'
                     sh 'kubectl apply -f kubernetes/ingress.yaml -n ${K8S_NAMESPACE}'
-                    sh 'kubectl scale deployment ${ORIGIN_DEPLOYMENT_NAME} --replicas=4'
                 }
             }
         }
