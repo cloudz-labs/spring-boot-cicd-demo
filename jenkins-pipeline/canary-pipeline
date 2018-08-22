@@ -59,7 +59,7 @@ podTemplate(label:label,
                     sh 'kubectl apply -f kubernetes/deployment-canary.yaml -n ${K8S_NAMESPACE}'
                     sh 'kubectl apply -f kubernetes/service.yaml -n ${K8S_NAMESPACE}'
                     sh 'kubectl apply -f kubernetes/ingress.yaml -n ${K8S_NAMESPACE}'
-                    sh 'kubectl scale deployment ${ORIGIN_DEPLOYMENT_NAME} --replicas=4'
+                    sh 'kubectl scale deployment ${ORIGIN_DEPLOYMENT_NAME} --replicas=4 -n ${K8S_NAMESPACE}'
                 }
             }
         }
