@@ -8,8 +8,8 @@ podTemplate(label:label,
     node(label) {
         stage('kubectl') {
             container('kubectl') {
-                sh 'kubectl scale deployment ${ORIGIN_DEPLOYMENT_NAME} --replicas=${ORIGIN_INSTANCE_COUNT}'
-                sh 'kubectl scale deployment ${CANARY_DEPLOYMENT_NAME} --replicas=${CANARY_INSTANCE_COUNT}'
+                sh 'kubectl scale deployment ${ORIGIN_DEPLOYMENT_NAME} --replicas=${ORIGIN_INSTANCE_COUNT} -n ${K8S_NAMESPACE}'
+                sh 'kubectl scale deployment ${CANARY_DEPLOYMENT_NAME} --replicas=${CANARY_INSTANCE_COUNT} -n ${K8S_NAMESPACE}'
             }
         }
     }
