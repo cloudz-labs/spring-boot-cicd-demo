@@ -2,6 +2,8 @@
 
 ## Maven build
 
+https://docs.google.com/presentation/d/1wEAvkft5lJs4j-A8xg2pU5tJOqPneVDnV3cWq-9NQCA
+
 ```
 $ mvn clean package
 ```
